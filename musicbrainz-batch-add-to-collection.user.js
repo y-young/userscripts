@@ -233,7 +233,7 @@ function loadCollections() {
                     </tr>`).join('')}
                     <tr>
                         <td>
-                            <a class="external" href="/collection/create" target="_blank" rel="noreferrer">
+                            <a href="/collection/create" target="_blank" rel="noreferrer">
                                 Create a new collection
                             </a>
                         </td>
