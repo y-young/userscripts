@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              MusicBrainz Batch Add to Collection
 // @namespace         https://github.com/y-young/userscripts
-// @version           2021.8.25
+// @version           2021.8.25.1
 // @description       Batch add entities to MusicBrainz collection and copy MBIDs from entity pages, search result or existing collections.
 // @author            y-young
 // @licence           MIT; https://opensource.org/licenses/MIT
@@ -22,12 +22,12 @@
 'use strict';
 
 // To enable "Copy MBIDs" button, set this option to true
-const SHOW_COPY_BUTTON = true;
+const SHOW_COPY_BUTTON = false;
 // Whether to close dialog when successfully submitted
 const CLOSE_DIALOG_AFTER_SUBMIT = true;
 
 const IDENTIFIER = "batch-add-to-collection";
-const CLIENT = "BatchAddToCollection/2021.8.25(https://github.com/y-young)";
+const CLIENT = "BatchAddToCollection/2021.8.25.1(https://github.com/y-young)";
 const ENTITY_TYPE_MAPPING = {
     artist: "release-group",
     label: "release",
@@ -278,19 +278,13 @@ function initTableCheckboxes(table) {
             return;
         }
         const gid = getGidFromUrl(entityLink.href);
-        switch (entityType) {
-            case "release":
-            case "search":
-            case "series":
-            case "work":
-                row.prepend(createCheckbox(gid));
-                break;
-            default: {
-                // Use existing checkboxes
-                const checkbox = row.querySelector("td input[type='checkbox']");
-                checkbox.classList.add(IDENTIFIER);
-                checkbox.dataset.id = gid;
-            }
+        // Use existing checkboxes if possible
+        const checkbox = row.querySelector("td input[type='checkbox']");
+        if (checkbox) {
+            checkbox.classList.add(IDENTIFIER);
+            checkbox.dataset.id = gid;
+        } else {
+            row.prepend(createCheckbox(gid));
         }
     });
     // Update table headers
@@ -312,6 +306,11 @@ function initTableCheckboxes(table) {
         case "search":
         case "series":
             table.querySelector("thead tr").prepend(createToggleSelectionCheckbox());
+            break;
+        case "collection":
+            if (!table.querySelector("thead th input[type='checkbox']")) {
+                table.querySelector("thead tr").prepend(createToggleSelectionCheckbox());
+            }
             break;
     }
 }
