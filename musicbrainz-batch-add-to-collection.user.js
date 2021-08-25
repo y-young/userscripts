@@ -258,7 +258,7 @@ function toggleSelection(event) {
 }
 
 function createToggleSelectionCheckbox() {
-    const headCell = document.createElement("td");
+    const headCell = document.createElement("th");
     const checkbox = document.createElement("input");
     checkbox.setAttribute("type", "checkbox");
     checkbox.addEventListener("click", toggleSelection);
