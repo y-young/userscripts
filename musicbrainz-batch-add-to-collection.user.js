@@ -233,7 +233,7 @@ function loadCollections() {
                     </tr>`).join('')}
                     <tr>
                         <td>
-                            <a class="external" href="/collection/create" target="_blank" rel="noreferrer">
+                            <a href="/collection/create" target="_blank" rel="noreferrer">
                                 Create a new collection
                             </a>
                         </td>
@@ -263,7 +263,7 @@ function createToggleSelectionCheckbox() {
     checkbox.setAttribute("type", "checkbox");
     checkbox.addEventListener("click", toggleSelection);
     headCell.appendChild(checkbox);
-    headCell.style.width = "1em";
+    headCell.className = "checkbox-cell";
     return headCell;
 }
 
