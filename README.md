@@ -1,6 +1,8 @@
 # Userscripts
 
-To report bugs or request features, [open an issue](https://github.com/y-young/userscripts/issues/new) with according [labels](https://github.com/y-young/userscripts/labels).
+To ask for help, [create a discussion](https://github.com/y-young/userscripts/discussions/new).
+
+To report bugs or request new features, [open an issue](https://github.com/y-young/userscripts/issues/new).
 
 ## MusicBrainz
 
