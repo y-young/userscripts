@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              MusicBrainz Batch Add to Collection
 // @namespace         https://github.com/y-young/userscripts
-// @version           2021.8.25
+// @version           2021.8.25.1
 // @description       Batch add entities to MusicBrainz collection and copy MBIDs from entity pages, search result or existing collections.
 // @author            y-young
 // @licence           MIT; https://opensource.org/licenses/MIT
@@ -258,12 +258,12 @@ function toggleSelection(event) {
 }
 
 function createToggleSelectionCheckbox() {
-    const headCell = document.createElement("td");
+    const headCell = document.createElement("th");
     const checkbox = document.createElement("input");
     checkbox.setAttribute("type", "checkbox");
     checkbox.addEventListener("click", toggleSelection);
     headCell.appendChild(checkbox);
-    headCell.style.width = "1em";
+    headCell.className = "checkbox-cell";
     return headCell;
 }
 
