@@ -1,18 +1,17 @@
 // ==UserScript==
 // @name              MusicBrainz Batch Add to Collection
 // @namespace         https://github.com/y-young/userscripts
-// @version           2021.8.25.1
+// @version           2021.8.27
 // @description       Batch add entities to MusicBrainz collection and copy MBIDs from entity pages, search result or existing collections.
 // @author            y-young
 // @licence           MIT; https://opensource.org/licenses/MIT
 // @supportURL        https://github.com/y-young/userscripts/labels/mb-batch-add-to-collection
 // @downloadURL       https://github.com/y-young/userscripts/raw/master/musicbrainz-batch-add-to-collection.user.js
-// @include           /^https?:\/\/(.*\.)?musicbrainz.org\/(artist|collection|label|release|release-group|series|work)\/[\w-]+(\/disc\/.*)?\/?(\?page=\d+)?$/
+// @include           /^https?:\/\/(.*\.)?musicbrainz.org\/(artist|collection|label|release|release-group|series|work)\/[\w-]{32,}(\/disc\/.*)?\/?(\?page=\d+)?$/
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/area\/[\w-]+\/(artists|events|labels|releases|recordings|places|works)\/?(\?page=\d+)?$/
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/artist\/[\w-]+\/(events|releases|recordings|works)\/?(\?page=\d+)?$/
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/place\/[\w-]+\/events\/?(\?page=\d+)?$/
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/search\?query=.*&type=(artist|event|label|instrument|place|recording|release_group|release|series|work)/
-// @exclude           /^https?:\/\/(.*\.)?musicbrainz.org\/collection/create/
 // @grant             GM_setClipboard
 // @run-at            document-idle
 // @name:zh-CN        MusicBrainz批量添加收藏
@@ -27,7 +26,7 @@ const SHOW_COPY_BUTTON = false;
 const CLOSE_DIALOG_AFTER_SUBMIT = true;
 
 const IDENTIFIER = "batch-add-to-collection";
-const CLIENT = "BatchAddToCollection/2021.8.25.1(https://github.com/y-young)";
+const CLIENT = "BatchAddToCollection/2021.8.27(https://github.com/y-young)";
 const ENTITY_TYPE_MAPPING = {
     artist: "release-group",
     label: "release",
