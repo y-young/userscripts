@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name              MusicBrainz Batch Add to Collection
 // @namespace         https://github.com/y-young/userscripts
-// @version           2021.8.27
+// @version           2021.9.1
 // @description       Batch add entities to MusicBrainz collection and copy MBIDs from entity pages, search result or existing collections.
 // @author            y-young
 // @licence           MIT; https://opensource.org/licenses/MIT
 // @supportURL        https://github.com/y-young/userscripts/labels/mb-batch-add-to-collection
 // @downloadURL       https://github.com/y-young/userscripts/raw/master/musicbrainz-batch-add-to-collection.user.js
-// @include           /^https?:\/\/(.*\.)?musicbrainz.org\/(artist|collection|label|release|release-group|series|work)\/[\w-]{32,}(\/disc\/.*)?\/?(\?page=\d+)?$/
+// @include           /^https?:\/\/(.*\.)?musicbrainz.org\/(artist|collection|label|release|release-group|series|work)\/[\w-]{32,}(\/disc\/.*)?\/?(\?page=\d+|\?order=\w+)?$/
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/area\/[\w-]+\/(artists|events|labels|releases|recordings|places|works)\/?(\?page=\d+)?$/
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/artist\/[\w-]+\/(events|releases|recordings|works)\/?(\?page=\d+)?$/
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/place\/[\w-]+\/events\/?(\?page=\d+)?$/
@@ -26,7 +26,7 @@ const SHOW_COPY_BUTTON = false;
 const CLOSE_DIALOG_AFTER_SUBMIT = true;
 
 const IDENTIFIER = "batch-add-to-collection";
-const CLIENT = "BatchAddToCollection/2021.8.27(https://github.com/y-young)";
+const CLIENT = "BatchAddToCollection/2021.9.1(https://github.com/y-young)";
 const ENTITY_TYPE_MAPPING = {
     artist: "release-group",
     label: "release",
@@ -202,7 +202,15 @@ function loadCollections() {
             data.collections.filter(
                 collection =>
                     collection["entity-type"] === (collectionType === "release-group" ? "release_group" : collectionType)
-            )
+            ).sort((a, b) => {
+                if (a.name < b.name) {
+                    return -1;
+                }
+                if (a.name > b.name) {
+                    return 1;
+                }
+                return 0;
+            })
         )
         .then(result => {
             collections = result;
