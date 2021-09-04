@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              MusicBrainz Batch Add to Collection
 // @namespace         https://github.com/y-young/userscripts
-// @version           2021.9.1
+// @version           2021.9.4
 // @description       Batch add entities to MusicBrainz collection and copy MBIDs from entity pages, search result or existing collections.
 // @author            y-young
 // @licence           MIT; https://opensource.org/licenses/MIT
@@ -335,7 +335,10 @@ function openDialog() {
 function copyMBIDs() {
     const entityIds = getSelectedIds();
     GM_setClipboard(entityIds.join("\n"));
-    alert(`Copied ${entityIds.length} MBIDs to clipboard.`);
+    // temporarily replace the button text with a status message
+    const previousText = this.innerText;
+    this.innerText = `Copied ${entityIds.length} MBIDs`;
+    setTimeout(() => this.innerText = previousText, 1000);
 }
 
 function initButton() {
@@ -347,6 +350,7 @@ function initButton() {
     const copyButton = document.createElement("button");
     copyButton.setAttribute("type", "button");
     copyButton.innerText = "Copy MBIDs";
+    copyButton.title = `Copies MBIDs to clipboard.`;
     copyButton.addEventListener("click", copyMBIDs);
 
     let container = document.querySelector("form div.row span.buttons");
