@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              MusicBrainz Batch Add to Collection
 // @namespace         https://github.com/y-young/userscripts
-// @version           2021.9.4
+// @version           2021.9.5
 // @description       Batch add entities to MusicBrainz collection and copy MBIDs from entity pages, search result or existing collections.
 // @author            y-young
 // @licence           MIT; https://opensource.org/licenses/MIT
@@ -13,6 +13,9 @@
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/place\/[\w-]+\/events\/?(\?page=\d+)?$/
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/search\?query=.*&type=(artist|event|label|instrument|place|recording|release_group|release|series|work)/
 // @grant             GM_setClipboard
+// @grant             GM_getValue
+// @grant             GM_setValue
+// @grant             GM_deleteValue
 // @run-at            document-idle
 // @name:zh-CN        MusicBrainz批量添加收藏
 // @description:zh-CN 从条目页面、搜索结果或现有收藏页面批量复制MBID或添加项目到MusicBrainz收藏。
@@ -26,7 +29,7 @@ const SHOW_COPY_BUTTON = false;
 const CLOSE_DIALOG_AFTER_SUBMIT = true;
 
 const IDENTIFIER = "batch-add-to-collection";
-const CLIENT = "BatchAddToCollection/2021.9.1(https://github.com/y-young)";
+const CLIENT = "BatchAddToCollection/2021.9.5(https://github.com/y-young)";
 const ENTITY_TYPE_MAPPING = {
     artist: "release-group",
     label: "release",
@@ -104,6 +107,7 @@ const dialog = $("#" + IDENTIFIER + "-dialog").dialog({
     buttons: {
         Refresh: function() {
             collections = undefined;
+            GM_deleteValue("collections");
             dialogElement.innerHTML = DIALOG_LOADING_NOTICE;
             loadCollections();
         },
@@ -192,63 +196,88 @@ function addToCollection(event) {
     });
 }
 
+function renderCollections() {
+    document.querySelector("#" + IDENTIFIER + "-dialog").innerHTML = `
+        <div>You have the following ${collectionType} collection(s), click to add selected items:</div>
+        <div class="banner loading-message" style="background-position: right; display: none;">
+            Adding to collection...
+        </div>
+        <table class="tbl">
+            <thead>
+                <th>Name</th>
+                <th>Action</th>
+            </thead>
+            <tbody>
+                ${collections.map((collection, index) => `
+                <tr class="${index % 2 ? "odd" : "even"}">
+                    <td>
+                        <a href="/collection/${collection.id}" target="_blank" rel="noreferrer">
+                            ${collection.name}
+                        </a>
+                    </td>
+                    <td>
+                        <a name="add" data-id="${collection.id}" href="javascript:void(0)">
+                            Add
+                        </a>
+                    </td>
+                </tr>`).join('')}
+                <tr class="${collections.length % 2 ? "odd" : "even"}">
+                    <td>
+                        <a href="/collection/create" target="_blank" rel="noreferrer">
+                            Create a new collection
+                        </a>
+                    </td>
+                    <td />
+                </tr>
+            </tbody>
+        </table>
+        <p style="color: gray">
+            The collections are cached in local storage.
+            Click "Refresh" to get latest data from server.
+        </p>`;
+    document.querySelectorAll("#" + IDENTIFIER + "-dialog a[name='add']")
+        .forEach(element => element.addEventListener("click", addToCollection));
+}
+
+// Filter and sort collections according to current entity type
+function filterCollections(data) {
+    return data.filter(
+            collection =>
+                collection["entity-type"] === (collectionType === "release-group" ? "release_group" : collectionType)
+        ).sort((a, b) => {
+            if (a.name < b.name) {
+                return -1;
+            }
+            if (a.name > b.name) {
+                return 1;
+            }
+            return 0;
+        });
+}
+
 function loadCollections() {
-    if (collections) {
+    if (collections) { // Collections already rendered
         return collections;
     }
+    // Try to get cached collections
+    const cachedCollections = GM_getValue("collections");
+    if (cachedCollections) {
+        collections = filterCollections(cachedCollections);
+        renderCollections();
+        return collections;
+    }
+    // Fetch collections from server
     return request("/ws/2/collection")
         .then(response => response.json())
-        .then(data =>
-            data.collections.filter(
-                collection =>
-                    collection["entity-type"] === (collectionType === "release-group" ? "release_group" : collectionType)
-            ).sort((a, b) => {
-                if (a.name < b.name) {
-                    return -1;
-                }
-                if (a.name > b.name) {
-                    return 1;
-                }
-                return 0;
-            })
-        )
+        .then(data => data.collections)
+        .then(collections => {
+            GM_setValue("collections", collections);
+            return filterCollections(collections);
+        })
         .then(result => {
             collections = result;
-            document.querySelector("#" + IDENTIFIER + "-dialog").innerHTML = `
-            <div>You have the following ${collectionType} collection(s), click to add selected items:</div>
-            <div class="banner loading-message" style="background-position: right; display: none;">
-                Adding to collection...
-            </div>
-            <table class="tbl">
-                <thead>
-                    <th>Name</th>
-                    <th>Action</th>
-                </thead>
-                <tbody>
-                    ${result.map((collection, index) => `
-                    <tr class="${index % 2 ? "odd" : "even"}">
-                        <td>
-                            <a href="/collection/${collection.id}" target="_blank" rel="noreferrer">
-                                ${collection.name}
-                            </a>
-                        </td>
-                        <td>
-                            <a name="add" data-id="${collection.id}" href="javascript:void(0)">
-                                Add
-                            </a>
-                        </td>
-                    </tr>`).join('')}
-                    <tr>
-                        <td>
-                            <a href="/collection/create" target="_blank" rel="noreferrer">
-                                Create a new collection
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>`;
-            document.querySelectorAll("#" + IDENTIFIER + "-dialog a[name='add']")
-                .forEach(element => element.addEventListener("click", addToCollection));
+            renderCollections();
+            return collections;
         });
 }
 
