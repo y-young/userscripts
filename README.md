@@ -18,3 +18,21 @@ Userscripts for [MusicBrainz](https://musicbrainz.org/).
 Batch add entities to MusicBrainz collection and copy MBIDs from entity pages, search result or existing collections.
 
 Demonstration: https://community.metabrainz.org/t/batch-add-to-collection-and-batch-copy-mbids/548063
+
+### Import from Music Forest
+
+[![](https://img.shields.io/badge/-source-blue?logo=github&style=for-the-badge)](https://github.com/y-young/userscripts/blob/master/musicbrainz-import-from-music-forest.user.js)
+[![](https://img.shields.io/badge/-install-brightgreen?logo=github&style=for-the-badge)](https://github.com/y-young/userscripts/raw/master/musicbrainz-import-from-music-forest.user.js)
+[![](https://img.shields.io/badge/greasyfork-install-red?style=for-the-badge)](https://greasyfork.org/zh-CN/scripts/434464-musicbrainz-import-from-music-forest)
+[![](https://img.shields.io/badge/openuserjs-install-202d3b?style=for-the-badge)](https://openuserjs.org/scripts/yyoung/MusicBrainz_Import_from_Music_Forest)
+
+Import releases from [Music Forest](https://www.minc.or.jp/) into MusicBrainz.
+
+### Import from THBWiki
+
+[![](https://img.shields.io/badge/-source-blue?logo=github&style=for-the-badge)](https://github.com/y-young/userscripts/blob/master/musicbrainz-import-from-thbwiki.user.js)
+[![](https://img.shields.io/badge/-install-brightgreen?logo=github&style=for-the-badge)](https://github.com/y-young/userscripts/raw/master/musicbrainz-import-from-thbwiki.user.js)
+[![](https://img.shields.io/badge/greasyfork-install-red?style=for-the-badge)](https://greasyfork.org/zh-CN/scripts/434465-musicbrainz-import-from-thbwiki)
+[![](https://img.shields.io/badge/openuserjs-install-202d3b?style=for-the-badge)](https://openuserjs.org/scripts/yyoung/MusicBrainz_Import_from_THBWiki)
+
+Import releases from [THBWiki](https://thwiki.cc/) into MusicBrainz.
