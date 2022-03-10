@@ -17,7 +17,7 @@ Userscripts for [MusicBrainz](https://musicbrainz.org/).
 
 Batch add entities to MusicBrainz collection and copy MBIDs from entity pages, search result or existing collections.
 
-Demonstration: https://community.metabrainz.org/t/batch-add-to-collection-and-batch-copy-mbids/548063
+Demonstration: <https://community.metabrainz.org/t/batch-add-to-collection-and-batch-copy-mbids/548063>
 
 ### Import from Music Forest
 
@@ -36,3 +36,14 @@ Import releases from [Music Forest](https://www.minc.or.jp/) into MusicBrainz.
 [![](https://img.shields.io/badge/openuserjs-install-202d3b?style=for-the-badge)](https://openuserjs.org/scripts/yyoung/MusicBrainz_Import_from_THBWiki)
 
 Import releases from [THBWiki](https://thwiki.cc/) into MusicBrainz.
+
+### Artist Credits Helper
+
+[![](https://img.shields.io/badge/-source-blue?logo=github&style=for-the-badge)](https://github.com/y-young/userscripts/blob/master/musicbrainz-artist-credits-helper.user.js)
+[![](https://img.shields.io/badge/-install-brightgreen?logo=github&style=for-the-badge)](https://github.com/y-young/userscripts/raw/master/musicbrainz-artist-credits-helper.user.js)
+[![](https://img.shields.io/badge/greasyfork-install-red?style=for-the-badge)](https://greasyfork.org/zh-CN/scripts/441280-musicbrainz-artist-credits-helper)
+[![](https://img.shields.io/badge/openuserjs-install-202d3b?style=for-the-badge)](https://openuserjs.org/scripts/yyoung/MusicBrainz_Artist_Credits_Helper)
+
+Split and fill artist credits, append character voice actor credit, and guess artists from track titles.
+
+Demonstration: <https://community.metabrainz.org/t/artist-credits-helper-split-append-guess/576093>
