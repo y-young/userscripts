@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              MusicBrainz Batch Add to Collection
 // @namespace         https://github.com/y-young/userscripts
-// @version           2021.9.5
+// @version           2022.3.27
 // @description       Batch add entities to MusicBrainz collection and copy MBIDs from entity pages, search result or existing collections.
 // @author            y-young
 // @licence           MIT; https://opensource.org/licenses/MIT
@@ -17,7 +17,7 @@
 // @grant             GM_setValue
 // @grant             GM_deleteValue
 // @run-at            document-idle
-// @name:zh-CN        MusicBrainz批量添加收藏
+// @name:zh-CN        MusicBrainz 批量添加收藏
 // @description:zh-CN 从条目页面、搜索结果或现有收藏页面批量复制MBID或添加项目到MusicBrainz收藏。
 // ==/UserScript==
 
@@ -29,7 +29,7 @@ const SHOW_COPY_BUTTON = false;
 const CLOSE_DIALOG_AFTER_SUBMIT = true;
 
 const IDENTIFIER = "batch-add-to-collection";
-const CLIENT = "BatchAddToCollection/2021.9.5(https://github.com/y-young)";
+const CLIENT = "BatchAddToCollection/2022.3.27(https://github.com/y-young)";
 const ENTITY_TYPE_MAPPING = {
     artist: "release-group",
     label: "release",
@@ -79,6 +79,8 @@ switch (entityType) {
             collectionType = "release";
         } else if (collectionType === "attending" || collectionType === "maybe-attending") {
             collectionType = "event";
+        } else {
+            collectionType = collectionType.replaceAll('-collection', '');
         }
         break;
     }
