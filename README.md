@@ -26,7 +26,7 @@ Demonstration: <https://community.metabrainz.org/t/batch-add-to-collection-and-b
 [![](https://img.shields.io/badge/greasyfork-install-red?style=for-the-badge)](https://greasyfork.org/zh-CN/scripts/434464-musicbrainz-import-from-music-forest)
 [![](https://img.shields.io/badge/openuserjs-install-202d3b?style=for-the-badge)](https://openuserjs.org/scripts/yyoung/MusicBrainz_Import_from_Music_Forest)
 
-Import releases from [Music Forest](https://www.minc.or.jp/) into MusicBrainz.
+Import releases and submit ISRCs from [Music Forest](https://www.minc.or.jp/) into MusicBrainz.
 
 ### Import from THBWiki
 

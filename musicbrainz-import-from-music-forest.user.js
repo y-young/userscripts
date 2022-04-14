@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MusicBrainz Import from Music Forest
 // @namespace    https://github.com/y-young
-// @version      2021.10.25
+// @version      2022.4.14
 // @description  Import releases from Music Forest into MusicBrainz.
 // @author       y-young
 // @licence      MIT; https://opensource.org/licenses/MIT
@@ -80,7 +80,7 @@ function parseDiscFormat(discFormat) {
 
 /*
  * Parse track duration
- * `1:33:33` -> "1:33:33`
+ * `1:33:33` -> "1:33:33"
  * `3'33"` -> "3:33"
  * `33"` -> "0:33"
  */
@@ -112,6 +112,11 @@ function parseArtistCredit(artists) {
     }, []);
 }
 
+function parseISRC(isrc) {
+    isrc = isrc.trim();
+    return isrc === "-" ? "" : isrc;
+}
+
 function parseTrackList(trackList) {
     const rows = trackList.querySelectorAll("tr:not(.header)");
     const tracks = [];
@@ -125,10 +130,12 @@ function parseTrackList(trackList) {
         const title = cols[2];
         const duration = parseDuration(cols[4]);
         const artist_credit = parseArtistCredit(cols[5]);
+        const isrc = parseISRC(cols[6]);
         tracks.push({
             title,
             duration,
-            artist_credit
+            artist_credit,
+            isrc
         });
     });
     return tracks;
@@ -173,7 +180,14 @@ function parseModalContent() {
         discs,
         urls: []
     };
+    return release;
+}
 
+function importToMB() {
+    const release = parseModalContent();
+    if(!release) {
+        return;
+    }
     const note = `
 
 ---------------
@@ -185,8 +199,24 @@ Imported from Music Forest using https://github.com/y-young/userscripts#import-f
     form.className = "clearfix";
     form.style.display = "none";
     form.innerHTML = formHtml;
+    const modal = document.querySelector("div#cd_detail");
     modal.querySelector("div.modal-body").prepend(form);
     form.querySelector("button[type='submit']").click();
 }
 
-GM_registerMenuCommand("Import into MusicBrainz", parseModalContent);
+function submitISRCs() {
+    const release = parseModalContent();
+    if(!release) {
+        return;
+    }
+    const params = new URLSearchParams();
+    release.discs.forEach((disc, discIndex) => {
+        disc.tracks.forEach((track, trackIndex) => {
+            params.append(`isrc${discIndex + 1}-${trackIndex + 1}`, track.isrc);
+        });
+    });
+    window.open("https://magicisrc.kepstin.ca/?" + params.toString());
+}
+
+GM_registerMenuCommand("Import into MusicBrainz", importToMB);
+GM_registerMenuCommand("Submit ISRCs", submitISRCs);
