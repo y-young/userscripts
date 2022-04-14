@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MusicBrainz Import from Music Forest
 // @namespace    https://github.com/y-young
-// @version      2022.4.14
+// @version      2022.4.14.1
 // @description  Import releases from Music Forest into MusicBrainz.
 // @author       y-young
 // @licence      MIT; https://opensource.org/licenses/MIT
@@ -141,6 +141,12 @@ function parseTrackList(trackList) {
     return tracks;
 }
 
+function resolveReleaseArtist(catno) {
+    const rows = Array.from(document.querySelectorAll("table#cd-list tr:not(.header)"));
+    const row = rows.find(row => row.children[1].innerText.trim() === catno);
+    return parseArtistCredit(row.children[4].innerText);
+}
+
 function parseModalContent() {
     const modal = document.querySelector("div#cd_detail");
     if (!modal.classList.contains("in")) {
@@ -152,9 +158,11 @@ function parseModalContent() {
     const metaItems = Array.from(
         modal.querySelectorAll("div.detail_data div.col-sm-3")
     ).map(item => item.innerText);
-    const labels = parseCatNo(metaItems[0].substr(3));
+    const catno = metaItems[0].substr(3);
+    const labels = parseCatNo(catno);
     const date = parseDate(metaItems[1].substr(4));
     const barcode = metaItems[4].substr(4);
+    const artist_credit = resolveReleaseArtist(catno);
 
     const discFormats = modal.querySelectorAll("div.disk_data div.col-sm-2:first-child");
     const trackLists = modal.querySelectorAll("table.cd-detail2-track-list");
@@ -169,6 +177,7 @@ function parseModalContent() {
     });
     const release = {
         title,
+        artist_credit,
         type: "album",
         status: "official",
         language: "jpn",
