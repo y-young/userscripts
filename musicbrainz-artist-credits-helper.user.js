@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MusicBrainz Artist Credits Helper
 // @namespace    https://github.com/y-young/userscripts
-// @version      2022.3.10
+// @version      2022.5.14
 // @description  Split and fill artist credits, append character voice actor credit, and guess artists from track titles.
 // @author       y-young
 // @licence      MIT; https://opensource.org/licenses/MIT
@@ -15,12 +15,12 @@
 
 'use strict';
 
-const CLIENT = "Artist Credits Helper/2022.3.10(https://github.com/y-young)";
+const CLIENT = "Artist Credits Helper/2022.5.14(https://github.com/y-young)";
 const CV_JOIN_PHRASES = [" (CV ", ")"];
 const SEPARATOR = ",";
 
 const TRACK_ARTIST_PATTERN = /(?<=\s\(?)([^\w\s\(]{1,3} ?\S{1,3})\s?(?=Ver|Remix|ソロ)/;
-const JOIN_PHRASE_PATTERN = /\s*(?:\(CV[\.:： ]?|\)[,，、]?|\s(?:featuring|feat|ft|vs)[\.\s]|,|&)\s*/gi;
+const JOIN_PHRASE_PATTERN = /\s*(?:\(CV[\.:： ]?|\)\s*[,，、・]?|\s(?:featuring|feat|ft|vs)[\.\s]|,|，|、|&|・)\s*/gi;
 
 const ENABLE_GUESS_TRACK_ARTISTS = true;
 const ENABLE_APPEND_CHARACTER_CV = true;
