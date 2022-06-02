@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              MusicBrainz Batch Add to Collection
 // @namespace         https://github.com/y-young/userscripts
-// @version           2022.3.27
+// @version           2022.6.1
 // @description       Batch add entities to MusicBrainz collection and copy MBIDs from entity pages, search result or existing collections.
 // @author            y-young
 // @licence           MIT; https://opensource.org/licenses/MIT
@@ -11,7 +11,7 @@
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/area\/[\w-]+\/(artists|events|labels|releases|recordings|places|works)\/?(\?page=\d+)?$/
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/artist\/[\w-]+\/(events|releases|recordings|works)\/?(\?page=\d+)?$/
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/place\/[\w-]+\/events\/?(\?page=\d+)?$/
-// @include           /^https?:\/\/(.*\.)?musicbrainz.org\/search\?query=.*&type=(artist|event|label|instrument|place|recording|release_group|release|series|work)/
+// @include           /^https?:\/\/(.*\.)?musicbrainz.org\/search\?.*type=(artist|event|label|instrument|place|recording|release_group|release|series|work)/
 // @grant             GM_setClipboard
 // @grant             GM_getValue
 // @grant             GM_setValue
@@ -29,7 +29,7 @@ const SHOW_COPY_BUTTON = false;
 const CLOSE_DIALOG_AFTER_SUBMIT = true;
 
 const IDENTIFIER = "batch-add-to-collection";
-const CLIENT = "BatchAddToCollection/2022.3.27(https://github.com/y-young)";
+const CLIENT = "BatchAddToCollection/2022.6.1(https://github.com/y-young)";
 const ENTITY_TYPE_MAPPING = {
     artist: "release-group",
     label: "release",
