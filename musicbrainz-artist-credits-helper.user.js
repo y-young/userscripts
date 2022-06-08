@@ -1,25 +1,25 @@
 // ==UserScript==
 // @name         MusicBrainz Artist Credits Helper
 // @namespace    https://github.com/y-young/userscripts
-// @version      2022.5.14
+// @version      2022.6.8
 // @description  Split and fill artist credits, append character voice actor credit, and guess artists from track titles.
 // @author       y-young
-// @licence      MIT; https://opensource.org/licenses/MIT
+// @license      MIT; https://opensource.org/licenses/MIT
 // @supportURL   https://github.com/y-young/userscripts/labels/mb-artist-credits-helper
 // @downloadURL  https://github.com/y-young/userscripts/raw/master/musicbrainz-artist-credits-helper.user.js
-// @match        https://musicbrainz.org/release/*/edit
-// @match        https://musicbrainz.org/release/add
+// @match        https://*.musicbrainz.org/release/*/edit
+// @match        https://*.musicbrainz.org/release/add
 // @icon         https://musicbrainz.org/static/images/favicons/apple-touch-icon-72x72.png
 // @grant        none
 // ==/UserScript==
 
 'use strict';
 
-const CLIENT = "Artist Credits Helper/2022.5.14(https://github.com/y-young)";
+const CLIENT = "Artist Credits Helper/2022.6.8(https://github.com/y-young)";
 const CV_JOIN_PHRASES = [" (CV ", ")"];
 const SEPARATOR = ",";
 
-const TRACK_ARTIST_PATTERN = /(?<=\s\(?)([^\w\s\(]{1,3} ?\S{1,3})\s?(?=Ver|Remix|ソロ)/;
+const TRACK_ARTIST_PATTERN = /(?<=\s\(?)([^\w\s\(]{1,3} ?\S{1,3})\s?(?=Ver|Remix|ソロ)/i;
 const JOIN_PHRASE_PATTERN = /\s*(?:\(CV[\.:： ]?|\)\s*[,，、・]?|\s(?:featuring|feat|ft|vs)[\.\s]|,|，|、|&|・)\s*/gi;
 
 const ENABLE_GUESS_TRACK_ARTISTS = true;
@@ -107,11 +107,13 @@ class ArtistCreditsEditor {
         // Add new artist credits if necessary
         if (inputs.length < credits.length) {
             for (let i = 1; i <= credits.length - inputs.length; ++i) {
-                this.#addButton.click();
+                setTimeout(() => this.#addButton.click(), 10);
             }
-            inputs = this.getInputs();
         }
-        credits.forEach((credit, index) => this.updateInputs(inputs[index], credit));
+        setTimeout(() => {
+            inputs = this.getInputs();
+            credits.forEach((credit, index) => this.updateInputs(inputs[index], credit));
+        }, 30);
     }
 
     /**
@@ -120,8 +122,10 @@ class ArtistCreditsEditor {
      */
     append(credit) {
         this.#addButton.click();
-        const newInput = this.getInputs(-1)[0];
-        this.updateInputs(newInput, credit);
+        setTimeout(() => {
+            const newInput = this.getInputs(-1)[0];
+            this.updateInputs(newInput, credit);
+        }, 10);
     }
 
     /**
@@ -234,6 +238,7 @@ function guessTrackArtists(event) {
         const title = track.querySelector("td.title > input").value;
         const artist = title.match(TRACK_ARTIST_PATTERN);
         if (!artist) {
+            console.log("No artist found:", title);
             return;
         }
         const input = track.querySelector("td.artist input.name");
@@ -243,7 +248,7 @@ function guessTrackArtists(event) {
 
 /**
  * Split a string into multiple artist credits
- * @param {string} str 
+ * @param {string} str
  * @returns {ArtistCredit[]} Parsed artist credits
  * @example
  * // returns [
@@ -304,7 +309,7 @@ function parseArtistCredits() {
     editor.fill(parseArtistCreditsString(acString));
 }
 
-function creatButton(title, onClick) {
+function createButton(title, onClick) {
     const button = document.createElement("button");
     button.setAttribute("type", "button");
     button.style.float = "left";
@@ -329,10 +334,10 @@ function initBubbleTools() {
     const initButtons = () => {
         const container = bubble.querySelector("div.buttons");
         if (ENABLE_APPEND_CHARACTER_CV) {
-            const appendButton = creatButton("Append Character CV", appendCharacterCV);
+            const appendButton = createButton("Append Character CV", appendCharacterCV);
             container.appendChild(appendButton);
         }
-        const parseButton = creatButton("Parse Artist Credits", parseArtistCredits);
+        const parseButton = createButton("Parse Artist Credits", parseArtistCredits);
         container.appendChild(parseButton);
     }
 
@@ -352,7 +357,7 @@ function initTrackTools() {
     }
     document.querySelectorAll("#tracklist-tools")
         .forEach((trackList, index) => {
-            const button = creatButton("Guess artist from track titles", guessTrackArtists);
+            const button = createButton("Guess artist from track titles", guessTrackArtists);
             button.dataset.index = index;
             trackList.querySelector("div.buttons").appendChild(button);
         });
