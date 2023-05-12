@@ -1,26 +1,26 @@
 // ==UserScript==
 // @name         MusicBrainz Artist Credits Helper
 // @namespace    https://github.com/y-young/userscripts
-// @version      2022.6.8
+// @version      2023.5.12
 // @description  Split and fill artist credits, append character voice actor credit, and guess artists from track titles.
 // @author       y-young
 // @license      MIT; https://opensource.org/licenses/MIT
 // @supportURL   https://github.com/y-young/userscripts/labels/mb-artist-credits-helper
 // @downloadURL  https://github.com/y-young/userscripts/raw/master/musicbrainz-artist-credits-helper.user.js
 // @match        https://*.musicbrainz.org/release/*/edit
-// @match        https://*.musicbrainz.org/release/add
+// @match        https://*.musicbrainz.org/release/add*
 // @icon         https://musicbrainz.org/static/images/favicons/apple-touch-icon-72x72.png
 // @grant        none
 // ==/UserScript==
 
 'use strict';
 
-const CLIENT = "Artist Credits Helper/2022.6.8(https://github.com/y-young)";
+const CLIENT = "Artist Credits Helper/2023.5.12(https://github.com/y-young)";
 const CV_JOIN_PHRASES = [" (CV ", ")"];
 const SEPARATOR = ",";
 
 const TRACK_ARTIST_PATTERN = /(?<=\s\(?)([^\w\s\(]{1,3} ?\S{1,3})\s?(?=Ver|Remix|ソロ)/i;
-const JOIN_PHRASE_PATTERN = /\s*(?:\(CV[\.:： ]?|\)\s*[,，、・]?|\s(?:featuring|feat|ft|vs)[\.\s]|,|，|、|&|・)\s*/gi;
+const JOIN_PHRASE_PATTERN = /\s*(?:[\(（]CV[\.:： ]?|[\)）]\s*[,，、・]?|\s(?:featuring|feat|ft|vs)[\.\s]|,|，|、|&|・)\s*/gi;
 
 const ENABLE_GUESS_TRACK_ARTISTS = true;
 const ENABLE_APPEND_CHARACTER_CV = true;
@@ -187,16 +187,27 @@ async function getVoiceActor(characterMBID) {
 }
 
 /**
- * Get the MBID of a given character in recent autocomplete entites
+ * Get the MBID of a given character in preview text
  * @param {string} characterName
  * @returns {string|undefined} MBID of the character
  */
 function getCharacterMBID(characterName) {
-    return JSON.parse(
-        window.localStorage.getItem("recentAutocompleteEntities")
-    )?.artist
+    const bubble = document.getElementById("artist-credit-bubble");
+    const previewText = bubble.querySelectorAll('tr')[1]
+    const artists = Array.from(previewText.querySelectorAll('a')).map(link => {
+        let name;
+        if (link.parentNode.classList.contains('name-variation')) {
+            // Credit name differs from artist name
+            name = link.title.split(' – ')[0].trim();
+        } else {
+            name = link.querySelector('bdi').innerText.trim();
+        }
+        const gid = link.href.split('/artist/')[1];
+        return { name, gid };
+    })
+    return artists
         ?.find(artist => artist.name === characterName)
-        ?.gid ?? alert("Character not found in recent entities.");
+        ?.gid ?? alert("Character not found in preview text.");
 }
 
 /**
