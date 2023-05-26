@@ -188,9 +188,9 @@ function addToCollection(collectionId, ids) {
     return Promise.all(tasks).then((responses) => {
         const error = responses.find((response) => response.status !== 200);
         if (error) {
-            console.error(error);
             throw error;
         }
+        alert(`Successfully added ${ids.length} item(s) to collection.`);
     });
 }
 
@@ -217,12 +217,12 @@ function addSelectedToCollection(event) {
     addToCollection(collectionId, ids)
         .then(() => {
             loadingNotice.style.display = "none";
-            alert(`Successfully added ${ids.length} item(s) to collection.`);
             if (CLOSE_DIALOG_AFTER_SUBMIT) {
                 dialog.dialog("close");
             }
         })
-        .catch(() => {
+        .catch((error) => {
+            console.error(error);
             alert("An error occurred, please see console output.");
         });
 }
@@ -431,38 +431,82 @@ function copyMBIDs() {
     setTimeout(() => (this.innerText = previousText), 1000);
 }
 
-function initButton() {
+function addClipboardToCollection() {
+    const input = prompt("Paste MBIDs of entities to add to this collection:");
+    if (!input) {
+        return;
+    }
+    const entityIds = Array.from(input.matchAll(/\b[a-fA-F0-9\-]{36}\b/gm)).map(
+        (match) => match[0]
+    );
+    if (!entityIds.length) {
+        alert("No MBIDs found in input.");
+        return;
+    }
+    const collectionId = path[2];
+
+    const previousText = this.innerText;
+    this.innerText = `Adding ${entityIds.length} entities...`;
+    this.disabled = true;
+
+    addToCollection(collectionId, entityIds)
+        .then(() => {
+            location.reload();
+        })
+        .catch((error) => {
+            console.error(error);
+            alert("An error occurred, please see console output.");
+        })
+        .finally(() => {
+            this.innerText = previousText;
+            this.disabled = false;
+        });
+}
+
+function initButtons() {
+    const buttons = [];
+
     const button = document.createElement("button");
     button.setAttribute("type", "button");
     button.innerText = "Batch add to collection";
     button.addEventListener("click", openDialog);
+    buttons.push(button);
 
-    const copyButton = document.createElement("button");
-    copyButton.setAttribute("type", "button");
-    copyButton.innerText = "Copy MBIDs";
-    copyButton.title = `Copies MBIDs to clipboard.`;
-    copyButton.addEventListener("click", copyMBIDs);
+    if (SHOW_COPY_BUTTON) {
+        const copyButton = document.createElement("button");
+        copyButton.setAttribute("type", "button");
+        copyButton.innerText = "Copy MBIDs";
+        copyButton.title = "Copies MBIDs to clipboard.";
+        copyButton.addEventListener("click", copyMBIDs);
+        buttons.push(copyButton);
+    }
+
+    if (entityType === "collection") {
+        const fromClipboardButton = document.createElement("button");
+        fromClipboardButton.setAttribute("type", "button");
+        fromClipboardButton.innerText = "Add from clipboard";
+        fromClipboardButton.title =
+            "Adds entities from clipboard to collection.";
+        fromClipboardButton.addEventListener("click", addClipboardToCollection);
+        buttons.push(fromClipboardButton);
+    }
 
     let container = document.querySelector("form div.row span.buttons");
     if (container) {
-        container.appendChild(button);
-        if (SHOW_COPY_BUTTON) {
-            container.appendChild(copyButton);
-        }
+        buttons.forEach((button) => container.appendChild(button));
     } else {
         container = document.createElement("form");
         container.innerHTML = `<div class="row"><span class="buttons"></span></div>`;
         const tables = document.querySelectorAll("table.tbl");
         // Insert after the last table if there're multiple ones
-        const precedent = tables[tables.length - 1];
+        let precedent = tables[tables.length - 1];
         if (!precedent) {
             // Empty collection
-            return;
+            precedent = document.querySelector("#content > p");
         }
-        container.querySelector("span.buttons").appendChild(button);
-        if (SHOW_COPY_BUTTON) {
-            container.querySelector("span.buttons").appendChild(copyButton);
-        }
+        buttons.forEach((button) =>
+            container.querySelector("span.buttons").appendChild(button)
+        );
         precedent.parentNode.insertBefore(container, precedent.nextSibling);
     }
 }
@@ -471,6 +515,6 @@ console.log("[Batch add to collection]", entityType, collectionType);
 if (SUPPORTED_TYPES.includes(collectionType)) {
     setTimeout(function () {
         initCheckboxes();
-        initButton();
+        initButtons();
     }, 500);
 }
