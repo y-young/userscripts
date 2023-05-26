@@ -13,14 +13,16 @@
 // @grant        none
 // ==/UserScript==
 
-'use strict';
+"use strict";
 
 const CLIENT = "Artist Credits Helper/2023.5.12(https://github.com/y-young)";
 const CV_JOIN_PHRASES = [" (CV ", ")"];
 const SEPARATOR = ",";
 
-const TRACK_ARTIST_PATTERN = /(?<=\s\(?)([^\w\s\(]{1,3} ?\S{1,3})\s?(?=Ver|Remix|ソロ)/i;
-const JOIN_PHRASE_PATTERN = /\s*(?:[\(（]CV[\.:： ]?|[\)）]\s*[,，、・]?|\s(?:featuring|feat|ft|vs)[\.\s]|,|，|、|&|・)\s*/gi;
+const TRACK_ARTIST_PATTERN =
+    /(?<=\s\(?)([^\w\s\(]{1,3} ?\S{1,3})\s?(?=Ver|Remix|ソロ)/i;
+const JOIN_PHRASE_PATTERN =
+    /\s*(?:[\(（]CV[\.:： ]?|[\)）]\s*[,，、・]?|\s(?:featuring|feat|ft|vs)[\.\s]|,|，|、|&|・)\s*/gi;
 
 const ENABLE_GUESS_TRACK_ARTISTS = true;
 const ENABLE_APPEND_CHARACTER_CV = true;
@@ -36,8 +38,8 @@ function request(url, options = {}) {
         ...options,
         headers: {
             "user-agent": CLIENT,
-            "accept": "application/json"
-        }
+            accept: "application/json",
+        },
     });
 }
 
@@ -51,7 +53,10 @@ function setInputValue(input, value) {
         return;
     }
     // https://stackoverflow.com/questions/23892547/what-is-the-best-way-to-trigger-onchange-event-in-react-js
-    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype,
+        "value"
+    ).set;
     nativeInputValueSetter.call(input, value);
     input.dispatchEvent(new Event("input", { bubbles: true }));
 }
@@ -85,16 +90,18 @@ class ArtistCreditsEditor {
      * @returns {ArtistCreditInputs[]}
      */
     getInputs(sliceIndex = 0) {
-        const inputs = Array.from(this.#bubble.querySelectorAll("input[type=text]"));
+        const inputs = Array.from(
+            this.#bubble.querySelectorAll("input[type=text]")
+        );
         const SIZE = 3;
-        return Array.from(
-            new Array(Math.ceil(inputs.length / SIZE)),
-            (_, i) => inputs.slice(i * SIZE, i * SIZE + SIZE))
+        return Array.from(new Array(Math.ceil(inputs.length / SIZE)), (_, i) =>
+            inputs.slice(i * SIZE, i * SIZE + SIZE)
+        )
             .slice(sliceIndex)
-            .map(input => ({
+            .map((input) => ({
                 artist: input[0],
                 creditedAs: input[1],
-                joinPhrase: input[2]
+                joinPhrase: input[2],
             }));
     }
 
@@ -112,7 +119,9 @@ class ArtistCreditsEditor {
         }
         setTimeout(() => {
             inputs = this.getInputs();
-            credits.forEach((credit, index) => this.updateInputs(inputs[index], credit));
+            credits.forEach((credit, index) =>
+                this.updateInputs(inputs[index], credit)
+            );
         }, 30);
     }
 
@@ -139,10 +148,8 @@ class ArtistCreditsEditor {
             return;
         }
         const oldCredit = Object.fromEntries(
-            Object.entries(inputs)
-                .map(
-                    ([key, value]) => [key, value.value]
-                ));
+            Object.entries(inputs).map(([key, value]) => [key, value.value])
+        );
         const newCredit = updater(oldCredit);
         this.updateInputs(inputs, newCredit);
     }
@@ -175,14 +182,15 @@ async function getVoiceActor(characterMBID) {
     }
     const RELATIONSHIP_ID = "e259a3f5-ce8e-45c1-9ef7-90ff7d0c7589";
     return request(`/ws/2/artist/${characterMBID}?inc=artist-rels&fmt=json`)
-        .then(response => response.json())
-        .then(data =>
-            data.relations
-                .find(relation =>
-                    relation["type-id"] === RELATIONSHIP_ID &&
-                    relation.direction === "backward" &&
-                    !relation.ended)
-                ?.artist.id ?? alert("No voice actor relationship found.")
+        .then((response) => response.json())
+        .then(
+            (data) =>
+                data.relations.find(
+                    (relation) =>
+                        relation["type-id"] === RELATIONSHIP_ID &&
+                        relation.direction === "backward" &&
+                        !relation.ended
+                )?.artist.id ?? alert("No voice actor relationship found.")
         );
 }
 
@@ -193,21 +201,24 @@ async function getVoiceActor(characterMBID) {
  */
 function getCharacterMBID(characterName) {
     const bubble = document.getElementById("artist-credit-bubble");
-    const previewText = bubble.querySelectorAll('tr')[1]
-    const artists = Array.from(previewText.querySelectorAll('a')).map(link => {
-        let name;
-        if (link.parentNode.classList.contains('name-variation')) {
-            // Credit name differs from artist name
-            name = link.title.split(' – ')[0].trim();
-        } else {
-            name = link.querySelector('bdi').innerText.trim();
+    const previewText = bubble.querySelectorAll("tr")[1];
+    const artists = Array.from(previewText.querySelectorAll("a")).map(
+        (link) => {
+            let name;
+            if (link.parentNode.classList.contains("name-variation")) {
+                // Credit name differs from artist name
+                name = link.title.split(" – ")[0].trim();
+            } else {
+                name = link.querySelector("bdi").innerText.trim();
+            }
+            const gid = link.href.split("/artist/")[1];
+            return { name, gid };
         }
-        const gid = link.href.split('/artist/')[1];
-        return { name, gid };
-    })
-    return artists
-        ?.find(artist => artist.name === characterName)
-        ?.gid ?? alert("Character not found in preview text.");
+    );
+    return (
+        artists?.find((artist) => artist.name === characterName)?.gid ??
+        alert("Character not found in preview text.")
+    );
 }
 
 /**
@@ -220,21 +231,20 @@ function appendCharacterCV() {
         alert("Please enter a character first.");
         return;
     }
-    getVoiceActor(getCharacterMBID(characterName))
-        .then(mbid => {
-            if (!mbid) {
-                return;
-            }
-            editor.update(-2, (credit) => ({
-                ...credit,
-                joinPhrase: credit.joinPhrase + SEPARATOR + " "
-            }));
-            editor.update(-1, (credit) => ({
-                ...credit,
-                joinPhrase: CV_JOIN_PHRASES[0]
-            }));
-            editor.append({ artist: mbid, joinPhrase: CV_JOIN_PHRASES[1] });
-        });
+    getVoiceActor(getCharacterMBID(characterName)).then((mbid) => {
+        if (!mbid) {
+            return;
+        }
+        editor.update(-2, (credit) => ({
+            ...credit,
+            joinPhrase: credit.joinPhrase + SEPARATOR + " ",
+        }));
+        editor.update(-1, (credit) => ({
+            ...credit,
+            joinPhrase: CV_JOIN_PHRASES[0],
+        }));
+        editor.append({ artist: mbid, joinPhrase: CV_JOIN_PHRASES[1] });
+    });
 }
 
 /**
@@ -245,7 +255,7 @@ function guessTrackArtists(event) {
     const index = event.target.dataset.index;
     const trackList = document.querySelectorAll("table.medium").item(index);
     const tracks = trackList.querySelectorAll("tr.track");
-    tracks.forEach(track => {
+    tracks.forEach((track) => {
         const title = track.querySelector("td.title > input").value;
         const artist = title.match(TRACK_ARTIST_PATTERN);
         if (!artist) {
@@ -314,7 +324,9 @@ function parseArtistCreditsString(str) {
 function parseArtistCredits() {
     const acString = editor.getInputs()[0]?.artist?.value;
     if (!acString) {
-        alert("Please enter the artist credits to parse in the first input box.");
+        alert(
+            "Please enter the artist credits to parse in the first input box."
+        );
         return;
     }
     editor.fill(parseArtistCreditsString(acString));
@@ -327,7 +339,7 @@ function createButton(title, onClick) {
     button.innerText = title;
     button.addEventListener("click", onClick);
     return button;
-};
+}
 
 function initBubbleTools() {
     let bubble = document.getElementById("artist-credit-bubble");
@@ -345,12 +357,18 @@ function initBubbleTools() {
     const initButtons = () => {
         const container = bubble.querySelector("div.buttons");
         if (ENABLE_APPEND_CHARACTER_CV) {
-            const appendButton = createButton("Append Character CV", appendCharacterCV);
+            const appendButton = createButton(
+                "Append Character CV",
+                appendCharacterCV
+            );
             container.appendChild(appendButton);
         }
-        const parseButton = createButton("Parse Artist Credits", parseArtistCredits);
+        const parseButton = createButton(
+            "Parse Artist Credits",
+            parseArtistCredits
+        );
         container.appendChild(parseButton);
-    }
+    };
 
     const observerCallback = (_, observer) => {
         initButtons();
@@ -366,9 +384,13 @@ function initTrackTools() {
     if (!ENABLE_GUESS_TRACK_ARTISTS) {
         return;
     }
-    document.querySelectorAll("#tracklist-tools")
+    document
+        .querySelectorAll("#tracklist-tools")
         .forEach((trackList, index) => {
-            const button = createButton("Guess artist from track titles", guessTrackArtists);
+            const button = createButton(
+                "Guess artist from track titles",
+                guessTrackArtists
+            );
             button.dataset.index = index;
             trackList.querySelector("div.buttons").appendChild(button);
         });

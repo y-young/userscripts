@@ -24,7 +24,7 @@
  *   - Artist credit of the tracks, you might want to separate doujin groups in a colaborative album
  */
 
-'use strict';
+"use strict";
 
 /*
  * Parse Catalog No
@@ -33,17 +33,17 @@
  * "ABCD-59/60" -> [{ catno: "ABCD-59" }, { catno: "ABCD-60" }]
  */
 function parseCatNo(catNoStr) {
-    const parts = catNoStr.split('/');
+    const parts = catNoStr.split("/");
     const first = parts[0];
-    const catNos = [
-        { catno: first }
-    ];
+    const catNos = [{ catno: first }];
     const endStr = parts[1];
     if (endStr) {
         const end = parseInt(endStr);
         const start = parseInt(first.slice(0 - endStr.length));
         for (let i = start + 1; i <= end; ++i) {
-            catNos.push({ catno: first.slice(0, 0 - i.toString().length) + i.toString() });
+            catNos.push({
+                catno: first.slice(0, 0 - i.toString().length) + i.toString(),
+            });
         }
     }
     return catNos;
@@ -54,26 +54,26 @@ function parseCatNo(catNoStr) {
  * "2021-1-1" -> { year: "2021", month: "1", day: "1" }
  */
 function parseDate(date) {
-    const data = date.split('-');
+    const data = date.split("-");
     if (data.length !== 3) {
         return {
-            year: '',
-            month: '',
-            day: ''
+            year: "",
+            month: "",
+            day: "",
         };
     }
     return {
         year: data[0],
         month: data[1],
-        day: data[2]
+        day: data[2],
     };
 }
 
 function parseArtistCredit(artists) {
-    return artists.split('\n').reduce((result, artist, index, array) => {
+    return artists.split("\n").reduce((result, artist, index, array) => {
         result.push({
             artist_name: artist,
-            joinphrase: index < (array.length - 1) ? " & " : ''
+            joinphrase: index < array.length - 1 ? " & " : "",
         });
         return result;
     }, []);
@@ -101,7 +101,7 @@ function parseSecondaryTypes(types) {
 function parseTrackList(table) {
     const rows = table.querySelectorAll("tr");
     const tracks = [];
-    rows.forEach(row => {
+    rows.forEach((row) => {
         //if (!row.querySelector("td.infoRD") && !row.querySelector("td.infoYD") && !row.querySelector("td.infoYL") && !row.querySelector("td.infoP") && !row.querySelector("td.infoO")) {
         if (!row.querySelector("td.title")) {
             return;
@@ -110,7 +110,7 @@ function parseTrackList(table) {
         const duration = row.querySelector("td.time").innerText;
         tracks.push({
             title,
-            duration
+            duration,
         });
     });
     return tracks;
@@ -119,10 +119,10 @@ function parseTrackList(table) {
 function parseDiscs() {
     const tables = document.querySelectorAll("table.musicTable");
     const discs = [];
-    tables.forEach(table => {
+    tables.forEach((table) => {
         discs.push({
             format: "CD",
-            tracks: parseTrackList(table)
+            tracks: parseTrackList(table),
         });
     });
     return discs;
@@ -136,10 +136,12 @@ function parseAlbum() {
         script: "Jpan",
         country: "JP",
         urls: [],
-        labels: []
+        labels: [],
     };
-    const metaItems = Array.from(document.querySelectorAll("table.doujininfo tr"));
-    metaItems.forEach(item => {
+    const metaItems = Array.from(
+        document.querySelectorAll("table.doujininfo tr")
+    );
+    metaItems.forEach((item) => {
         let label = item.querySelector("td.label");
         let text = item.querySelectorAll("td")[1];
         if (!label || !text) {
@@ -177,18 +179,18 @@ function parseAlbum() {
             case "编号":
             case "Catalog ID":
             case "型番":
-                release.labels.push({catno: text});
+                release.labels.push({ catno: text });
                 break;
             case "官网页面":
             case "Website":
             case "公式サイト":
-                text.split('\n').forEach(url => {
+                text.split("\n").forEach((url) => {
                     if (url === "（已经失效）") {
                         return;
                     }
                     release.urls.push({
                         url,
-                        link_type: "288"
+                        link_type: "288",
                     });
                 });
                 break;

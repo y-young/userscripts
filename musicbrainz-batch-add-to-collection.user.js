@@ -21,7 +21,7 @@
 // @description:zh-CN 从条目页面、搜索结果或现有收藏页面批量复制MBID或添加项目到MusicBrainz收藏。
 // ==/UserScript==
 
-'use strict';
+"use strict";
 
 // To enable "Copy MBIDs" button, set this option to true
 const SHOW_COPY_BUTTON = false;
@@ -36,8 +36,9 @@ const ENTITY_TYPE_MAPPING = {
     place: "event",
     "release-group": "release",
     release: "recording",
-    work: "recording"
+    work: "recording",
 };
+// prettier-ignore
 const SUPPORTED_TYPES = [
     "artist", "event", "label", "instrument", "place",
     "recording", "release", "release-group",
@@ -51,7 +52,7 @@ const DIALOG_LOADING_NOTICE = `
 
 const url = new URL(location.href);
 const origin = url.origin;
-const path = url.pathname.split('/');
+const path = url.pathname.split("/");
 
 // Determine entity type of current page and target collection type
 const entityType = path[1];
@@ -74,19 +75,25 @@ switch (entityType) {
         break;
     case "collection": {
         const type = document.querySelector("dd[class='type']").innerText;
-        collectionType = type.toLowerCase().replaceAll(' ', '-');
+        collectionType = type.toLowerCase().replaceAll(" ", "-");
         if (collectionType === "owned-music" || collectionType === "wishlist") {
             collectionType = "release";
-        } else if (collectionType === "attending" || collectionType === "maybe-attending") {
+        } else if (
+            collectionType === "attending" ||
+            collectionType === "maybe-attending"
+        ) {
             collectionType = "event";
         } else {
-            collectionType = collectionType.replaceAll('-collection', '');
+            collectionType = collectionType.replaceAll("-collection", "");
         }
         break;
     }
     case "series": {
         const type = document.querySelector("dd[class='type']").innerText;
-        collectionType = type.toLowerCase().replaceAll(' ', '-').replaceAll("-series", "");
+        collectionType = type
+            .toLowerCase()
+            .replaceAll(" ", "-")
+            .replaceAll("-series", "");
         break;
     }
 }
@@ -103,20 +110,20 @@ const dialog = $("#" + IDENTIFIER + "-dialog").dialog({
     autoOpen: false,
     height: 400,
     width: 350,
-    open: function() {
+    open: function () {
         loadCollections();
     },
     buttons: {
-        Refresh: function() {
+        Refresh: function () {
             collections = undefined;
             GM_deleteValue("collections");
             dialogElement.innerHTML = DIALOG_LOADING_NOTICE;
             loadCollections();
         },
-        Cancel: function() {
+        Cancel: function () {
             $(this).dialog("close");
-        }
-    }
+        },
+    },
 });
 
 function request(url, options = {}) {
@@ -124,13 +131,13 @@ function request(url, options = {}) {
         ...options,
         headers: {
             "user-agent": CLIENT,
-            "accept": "application/json"
-        }
+            accept: "application/json",
+        },
     });
 }
 
 function getGidFromUrl(url) {
-    const path = new URL(url).pathname.split('/');
+    const path = new URL(url).pathname.split("/");
     return path[2];
 }
 
@@ -153,8 +160,10 @@ function createCheckbox(recordingId) {
 
 function getSelectedIds() {
     const entityIds = Array.from(
-        document.querySelectorAll("input:checked[type='checkbox']." + IDENTIFIER)
-    ).map(checkbox => checkbox.dataset.id);
+        document.querySelectorAll(
+            "input:checked[type='checkbox']." + IDENTIFIER
+        )
+    ).map((checkbox) => checkbox.dataset.id);
     return entityIds;
 }
 
@@ -176,8 +185,8 @@ function addToCollection(collectionId, ids) {
             { method: "PUT" }
         )
     );
-    return Promise.all(tasks).then(responses => {
-        const error = responses.find(response => response.status !== 200);
+    return Promise.all(tasks).then((responses) => {
+        const error = responses.find((response) => response.status !== 200);
         if (error) {
             console.error(error);
             throw error;
@@ -201,17 +210,21 @@ function addSelectedToCollection(event) {
         dialog.dialog("close");
         return;
     }
-    const loadingNotice = document.querySelector("#" + IDENTIFIER + "-dialog div.loading-message");
+    const loadingNotice = document.querySelector(
+        "#" + IDENTIFIER + "-dialog div.loading-message"
+    );
     loadingNotice.style.display = "block";
-    addToCollection(collectionId, ids).then(() => {
-        loadingNotice.style.display = "none";
-        alert(`Successfully added ${ids.length} item(s) to collection.`);
-        if (CLOSE_DIALOG_AFTER_SUBMIT) {
-            dialog.dialog("close");
-        }
-    }).catch(() => {
-        alert("An error occurred, please see console output.");
-    });
+    addToCollection(collectionId, ids)
+        .then(() => {
+            loadingNotice.style.display = "none";
+            alert(`Successfully added ${ids.length} item(s) to collection.`);
+            if (CLOSE_DIALOG_AFTER_SUBMIT) {
+                dialog.dialog("close");
+            }
+        })
+        .catch(() => {
+            alert("An error occurred, please see console output.");
+        });
 }
 
 function renderCollections() {
@@ -226,19 +239,27 @@ function renderCollections() {
                 <th>Action</th>
             </thead>
             <tbody>
-                ${collections.map((collection, index) => `
+                ${collections
+                    .map(
+                        (collection, index) => `
                 <tr class="${index % 2 ? "odd" : "even"}">
                     <td>
-                        <a href="/collection/${collection.id}" target="_blank" rel="noreferrer">
+                        <a href="/collection/${
+                            collection.id
+                        }" target="_blank" rel="noreferrer">
                             ${collection.name}
                         </a>
                     </td>
                     <td>
-                        <a name="add" data-id="${collection.id}" href="javascript:void(0)">
+                        <a name="add" data-id="${
+                            collection.id
+                        }" href="javascript:void(0)">
                             Add
                         </a>
                     </td>
-                </tr>`).join('')}
+                </tr>`
+                    )
+                    .join("")}
                 <tr class="${collections.length % 2 ? "odd" : "even"}">
                     <td>
                         <a href="/collection/create" target="_blank" rel="noreferrer">
@@ -253,16 +274,24 @@ function renderCollections() {
             The collections are cached in local storage.
             Click "Refresh" to get latest data from server.
         </p>`;
-    document.querySelectorAll("#" + IDENTIFIER + "-dialog a[name='add']")
-        .forEach(element => element.addEventListener("click", addSelectedToCollection));
+    document
+        .querySelectorAll("#" + IDENTIFIER + "-dialog a[name='add']")
+        .forEach((element) =>
+            element.addEventListener("click", addSelectedToCollection)
+        );
 }
 
 // Filter and sort collections according to current entity type
 function filterCollections(data) {
-    return data.filter(
-            collection =>
-                collection["entity-type"] === (collectionType === "release-group" ? "release_group" : collectionType)
-        ).sort((a, b) => {
+    return data
+        .filter(
+            (collection) =>
+                collection["entity-type"] ===
+                (collectionType === "release-group"
+                    ? "release_group"
+                    : collectionType)
+        )
+        .sort((a, b) => {
             if (a.name < b.name) {
                 return -1;
             }
@@ -274,7 +303,8 @@ function filterCollections(data) {
 }
 
 function loadCollections() {
-    if (collections) { // Collections already rendered
+    if (collections) {
+        // Collections already rendered
         return collections;
     }
     // Try to get cached collections
@@ -286,13 +316,13 @@ function loadCollections() {
     }
     // Fetch collections from server
     return request("/ws/2/collection")
-        .then(response => response.json())
-        .then(data => data.collections)
-        .then(collections => {
+        .then((response) => response.json())
+        .then((data) => data.collections)
+        .then((collections) => {
             GM_setValue("collections", collections);
             return filterCollections(collections);
         })
-        .then(result => {
+        .then((result) => {
             collections = result;
             renderCollections();
             return collections;
@@ -306,9 +336,11 @@ function toggleSelection(event) {
         context = context.parentNode;
     }
     const checked = target.checked;
-    context.querySelectorAll("input[type='checkbox']." + IDENTIFIER).forEach(checkbox => {
-        checkbox.checked = checked;
-    });
+    context
+        .querySelectorAll("input[type='checkbox']." + IDENTIFIER)
+        .forEach((checkbox) => {
+            checkbox.checked = checked;
+        });
 }
 
 function createToggleSelectionCheckbox() {
@@ -324,8 +356,10 @@ function createToggleSelectionCheckbox() {
 function initTableCheckboxes(table) {
     // Get rows
     const rows = Array.from(table.querySelectorAll("tr.odd, tr.even"));
-    rows.forEach(row => {
-        const entityLink = row.querySelector(`td a[href^='/${collectionType}']`);
+    rows.forEach((row) => {
+        const entityLink = row.querySelector(
+            `td a[href^='/${collectionType}']`
+        );
         if (!entityLink) {
             // Some rows in search result are grouped together
             row.prepend(document.createElement("td"));
@@ -344,33 +378,42 @@ function initTableCheckboxes(table) {
     // Update table headers
     switch (entityType) {
         case "release":
-            table.querySelectorAll("thead th[colspan]").forEach(header => {
-                header.setAttribute("colspan", Number(header.getAttribute("colspan")) + 1);
+            table.querySelectorAll("thead th[colspan]").forEach((header) => {
+                header.setAttribute(
+                    "colspan",
+                    Number(header.getAttribute("colspan")) + 1
+                );
             });
-            table.querySelectorAll("tr.subh").forEach(header => {
+            table.querySelectorAll("tr.subh").forEach((header) => {
                 header.prepend(createToggleSelectionCheckbox());
             });
             break;
         case "work":
-            table.querySelectorAll("tr.subh th[colspan]").forEach(header => {
+            table.querySelectorAll("tr.subh th[colspan]").forEach((header) => {
                 header.setAttribute("colspan", "5");
             });
-            table.querySelector("thead tr").prepend(createToggleSelectionCheckbox());
+            table
+                .querySelector("thead tr")
+                .prepend(createToggleSelectionCheckbox());
             break;
         case "search":
         case "series":
-            table.querySelector("thead tr").prepend(createToggleSelectionCheckbox());
+            table
+                .querySelector("thead tr")
+                .prepend(createToggleSelectionCheckbox());
             break;
         case "collection":
             if (!table.querySelector("thead th input[type='checkbox']")) {
-                table.querySelector("thead tr").prepend(createToggleSelectionCheckbox());
+                table
+                    .querySelector("thead tr")
+                    .prepend(createToggleSelectionCheckbox());
             }
             break;
     }
 }
 
 function initCheckboxes() {
-    document.querySelectorAll("table.tbl").forEach(table => {
+    document.querySelectorAll("table.tbl").forEach((table) => {
         initTableCheckboxes(table);
     });
 }
@@ -385,7 +428,7 @@ function copyMBIDs() {
     // temporarily replace the button text with a status message
     const previousText = this.innerText;
     this.innerText = `Copied ${entityIds.length} MBIDs`;
-    setTimeout(() => this.innerText = previousText, 1000);
+    setTimeout(() => (this.innerText = previousText), 1000);
 }
 
 function initButton() {
