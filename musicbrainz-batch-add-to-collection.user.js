@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name              MusicBrainz Batch Add to Collection
 // @namespace         https://github.com/y-young/userscripts
-// @version           2022.6.2
+// @version           2023.5.26
 // @description       Batch add entities to MusicBrainz collection and copy MBIDs from entity pages, search result or existing collections.
 // @author            y-young
-// @licence           MIT; https://opensource.org/licenses/MIT
+// @license           MIT; https://opensource.org/licenses/MIT
 // @supportURL        https://github.com/y-young/userscripts/labels/mb-batch-add-to-collection
 // @downloadURL       https://github.com/y-young/userscripts/raw/master/musicbrainz-batch-add-to-collection.user.js
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/(artist|collection|label|release|release-group|series|work)\/[\w-]{32,}(\/disc\/.*)?\/?(\?page=\d+|\?order=\w+)?$/
@@ -29,7 +29,7 @@ const SHOW_COPY_BUTTON = false;
 const CLOSE_DIALOG_AFTER_SUBMIT = true;
 
 const IDENTIFIER = "batch-add-to-collection";
-const CLIENT = "BatchAddToCollection/2022.6.2(https://github.com/y-young)";
+const CLIENT = "BatchAddToCollection/2023.5.26(https://github.com/y-young)";
 const ENTITY_TYPE_MAPPING = {
     artist: "release-group",
     label: "release",
@@ -62,7 +62,7 @@ switch (entityType) {
         const subType = path[3];
         if (subType) {
             // Convert plural form to singular form
-            collectionType = subType.substr(0, subType.length - 1);
+            collectionType = subType.substring(0, subType.length - 1);
         }
         break;
     }
@@ -158,7 +158,34 @@ function getSelectedIds() {
     return entityIds;
 }
 
-function addToCollection(event) {
+function chunked(array, size) {
+    const result = [];
+    for (let i = 0; i < array.length; i += size) {
+        result.push(array.slice(i, i + size));
+    }
+    return result;
+}
+
+function addToCollection(collectionId, ids) {
+    const CHUNK_SIZE = 400;
+    const tasks = chunked(ids, CHUNK_SIZE).map((chunk) =>
+        request(
+            `/ws/2/collection/${collectionId}/${getCollectionTypePlural()}/${chunk.join(
+                ";"
+            )}?client=${encodeURIComponent(CLIENT)}`,
+            { method: "PUT" }
+        )
+    );
+    return Promise.all(tasks).then(responses => {
+        const error = responses.find(response => response.status !== 200);
+        if (error) {
+            console.error(error);
+            throw error;
+        }
+    });
+}
+
+function addSelectedToCollection(event) {
     let target = event.target;
     // Compatibility with katakana-terminator
     if (target.nodeName === "RUBY") {
@@ -174,27 +201,16 @@ function addToCollection(event) {
         dialog.dialog("close");
         return;
     }
-    if (ids.length > 400) {
-        alert("Too many items, you can select at most 400 items.");
-        dialog.dialog("close");
-        return;
-    }
     const loadingNotice = document.querySelector("#" + IDENTIFIER + "-dialog div.loading-message");
     loadingNotice.style.display = "block";
-    request(
-        `/ws/2/collection/${collectionId}/${getCollectionTypePlural()}/${ids.join(';')}?client=${encodeURIComponent(CLIENT)}`,
-        {method: "PUT"}
-    ).then(response => {
+    addToCollection(collectionId, ids).then(() => {
         loadingNotice.style.display = "none";
-        if (response.status === 200) {
-            alert(`Successfully added ${ids.length} item(s) to collection.`);
-            if (CLOSE_DIALOG_AFTER_SUBMIT) {
-                dialog.dialog("close");
-            }
-        } else {
-            alert("An error occurred.");
-            console.error(response);
+        alert(`Successfully added ${ids.length} item(s) to collection.`);
+        if (CLOSE_DIALOG_AFTER_SUBMIT) {
+            dialog.dialog("close");
         }
+    }).catch(() => {
+        alert("An error occurred, please see console output.");
     });
 }
 
@@ -238,7 +254,7 @@ function renderCollections() {
             Click "Refresh" to get latest data from server.
         </p>`;
     document.querySelectorAll("#" + IDENTIFIER + "-dialog a[name='add']")
-        .forEach(element => element.addEventListener("click", addToCollection));
+        .forEach(element => element.addEventListener("click", addSelectedToCollection));
 }
 
 // Filter and sort collections according to current entity type
