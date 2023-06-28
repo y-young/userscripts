@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              MusicBrainz Batch Add to Collection
 // @namespace         https://github.com/y-young/userscripts
-// @version           2023.5.26
+// @version           2023.6.28
 // @description       Batch add entities to MusicBrainz collection and copy MBIDs from entity pages, search result or existing collections.
 // @author            y-young
 // @license           MIT; https://opensource.org/licenses/MIT
@@ -29,7 +29,7 @@ const SHOW_COPY_BUTTON = false;
 const CLOSE_DIALOG_AFTER_SUBMIT = true;
 
 const IDENTIFIER = "batch-add-to-collection";
-const CLIENT = "BatchAddToCollection/2023.5.26(https://github.com/y-young)";
+const CLIENT = "BatchAddToCollection/2023.6.28(https://github.com/y-young)";
 const ENTITY_TYPE_MAPPING = {
     artist: "release-group",
     label: "release",
@@ -511,8 +511,13 @@ function initButtons() {
     }
 }
 
+function isLoggedOut() {
+    const loginLink = document.querySelector("ul.menu > li > a");
+    return loginLink && loginLink.href.split("/")[3].startsWith("login");
+}
+
 console.log("[Batch add to collection]", entityType, collectionType);
-if (SUPPORTED_TYPES.includes(collectionType)) {
+if (SUPPORTED_TYPES.includes(collectionType) && !isLoggedOut()) {
     setTimeout(function () {
         initCheckboxes();
         initButtons();
