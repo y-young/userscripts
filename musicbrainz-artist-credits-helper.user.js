@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MusicBrainz Artist Credits Helper
 // @namespace    https://github.com/y-young/userscripts
-// @version      2023.5.12
+// @version      2023.10.7
 // @description  Split and fill artist credits, append character voice actor credit, and guess artists from track titles.
 // @author       y-young
 // @license      MIT; https://opensource.org/licenses/MIT
@@ -10,12 +10,15 @@
 // @match        https://*.musicbrainz.org/release/*/edit
 // @match        https://*.musicbrainz.org/release/add*
 // @icon         https://musicbrainz.org/static/images/favicons/apple-touch-icon-72x72.png
-// @grant        none
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_registerMenuCommand
 // ==/UserScript==
 
 "use strict";
 
-const CLIENT = "Artist Credits Helper/2023.5.12(https://github.com/y-young)";
+const CLIENT = "Artist Credits Helper/2023.10.7(https://github.com/y-young)";
+// Default values
 const CV_JOIN_PHRASES = [" (CV ", ")"];
 const SEPARATOR = ",";
 
@@ -231,19 +234,46 @@ function appendCharacterCV() {
         alert("Please enter a character first.");
         return;
     }
+    const { joinPhrases, separator } = getCVJoinPhrases();
     getVoiceActor(getCharacterMBID(characterName)).then((mbid) => {
         if (!mbid) {
             return;
         }
         editor.update(-2, (credit) => ({
             ...credit,
-            joinPhrase: credit.joinPhrase + SEPARATOR + " ",
+            joinPhrase: credit.joinPhrase + separator + " ",
         }));
         editor.update(-1, (credit) => ({
             ...credit,
-            joinPhrase: CV_JOIN_PHRASES[0],
+            joinPhrase: joinPhrases[0],
         }));
-        editor.append({ artist: mbid, joinPhrase: CV_JOIN_PHRASES[1] });
+        editor.append({ artist: mbid, joinPhrase: joinPhrases[1] });
+    });
+}
+
+function getCVJoinPhrases() {
+    const config = GM_getValue("cv_join_phrases");
+    return {
+        joinPhrases: CV_JOIN_PHRASES,
+        separator: SEPARATOR,
+        ...config,
+    };
+}
+
+function setCVJoinPhrases() {
+    const config = getCVJoinPhrases();
+    const phrase1 = prompt(
+        `Enter the first part of join phrases:`,
+        config.joinPhrases[0]
+    );
+    const phrase2 = prompt(
+        `Enter the second part of join phrases:`,
+        config.joinPhrases[1]
+    );
+    const separator = prompt(`Enter the separator:`, config.separator);
+    GM_setValue("cv_join_phrases", {
+        joinPhrases: [phrase1, phrase2],
+        separator: separator,
     });
 }
 
@@ -398,3 +428,4 @@ function initTrackTools() {
 
 initBubbleTools();
 initTrackTools();
+GM_registerMenuCommand("Config CV Join Phrases", setCVJoinPhrases);
