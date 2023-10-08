@@ -47,3 +47,14 @@ Import releases from [THBWiki](https://thwiki.cc/) into MusicBrainz.
 Split and fill artist credits, append character voice actor credit, and guess artists from track titles.
 
 Demonstration: <https://community.metabrainz.org/t/artist-credits-helper-split-append-guess/576093>
+
+### Batch Query AcoustID
+
+[![](https://img.shields.io/badge/-source-blue?logo=github&style=for-the-badge)](https://github.com/y-young/userscripts/blob/master/musicbrainz-batch-query-acoustid.user.js)
+[![](https://img.shields.io/badge/-install-brightgreen?logo=github&style=for-the-badge)](https://github.com/y-young/userscripts/raw/master/musicbrainz-batch-query-acoustid.user.js)
+[![](https://img.shields.io/badge/greasyfork-install-red?style=for-the-badge)](https://greasyfork.org/zh-CN/scripts/476918-musicbrainz-batch-query-acoustid)
+[![](https://img.shields.io/badge/openuserjs-install-202d3b?style=for-the-badge)](https://openuserjs.org/scripts/yyoung/MusicBrainz_Batch_Query_AcoustID)
+
+Batch query AcoustID of recordings on release and collection page.
+
+Screenshot: <https://community.metabrainz.org/t/a-new-musicbrainz-user-script-was-released/77897/64>
