@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              MusicBrainz Batch Add to Collection
 // @namespace         https://github.com/y-young/userscripts
-// @version           2023.6.28
+// @version           2024.3.8
 // @description       Batch add entities to MusicBrainz collection and copy MBIDs from entity pages, search result or existing collections.
 // @author            y-young
 // @license           MIT; https://opensource.org/licenses/MIT
@@ -64,6 +64,11 @@ switch (entityType) {
         if (subType) {
             // Convert plural form to singular form
             collectionType = subType.substring(0, subType.length - 1);
+        } else if (entityType === "artist") {
+            // Artist index pages without release groups fall back to list recordings
+            if (!document.querySelector("table.release-group-list")) {
+                collectionType = "recording";
+            }
         }
         break;
     }
@@ -361,8 +366,10 @@ function initTableCheckboxes(table) {
             `td a[href^='/${collectionType}']`
         );
         if (!entityLink) {
-            // Some rows in search result are grouped together
-            row.prepend(document.createElement("td"));
+            if (entityType === "search") {
+                // Some rows in search result are grouped together
+                row.prepend(document.createElement("td"));
+            }
             return;
         }
         const gid = getGidFromUrl(entityLink.href);
