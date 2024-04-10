@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              MusicBrainz Batch Add to Collection
 // @namespace         https://github.com/y-young/userscripts
-// @version           2024.3.8
+// @version           2024.4.10
 // @description       Batch add entities to MusicBrainz collection and copy MBIDs from entity pages, search result or existing collections.
 // @author            y-young
 // @license           MIT; https://opensource.org/licenses/MIT
@@ -9,7 +9,7 @@
 // @downloadURL       https://github.com/y-young/userscripts/raw/master/musicbrainz-batch-add-to-collection.user.js
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/(artist|collection|label|release|release-group|series|work)\/[\w-]{32,}(\/disc\/.*)?\/?(\?page=\d+|\?order=\w+)?$/
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/area\/[\w-]+\/(artists|events|labels|releases|recordings|places|works)\/?(\?page=\d+)?$/
-// @include           /^https?:\/\/(.*\.)?musicbrainz.org\/artist\/[\w-]+\/(events|releases|recordings|works)\/?(\?page=\d+)?$/
+// @include           /^https?:\/\/(.*\.)?musicbrainz.org\/artist\/[\w-]+\/(events|releases|recordings|works)\/?(\?page=\d+|\?filter.+)?$/
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/place\/[\w-]+\/events\/?(\?page=\d+)?$/
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/search\?.*type=(artist|event|label|instrument|place|recording|release_group|release|series|work)/
 // @grant             GM_setClipboard
