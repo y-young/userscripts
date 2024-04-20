@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              MusicBrainz Batch Add to Collection
 // @namespace         https://github.com/y-young/userscripts
-// @version           2024.4.10
+// @version           2024.4.20
 // @description       Batch add entities to MusicBrainz collection and copy MBIDs from entity pages, search result or existing collections.
 // @author            y-young
 // @license           MIT; https://opensource.org/licenses/MIT
@@ -29,7 +29,8 @@ const SHOW_COPY_BUTTON = false;
 const CLOSE_DIALOG_AFTER_SUBMIT = true;
 
 const IDENTIFIER = "batch-add-to-collection";
-const CLIENT = "BatchAddToCollection/2023.6.28(https://github.com/y-young)";
+const CLIENT =
+    "BatchAddToCollection/2024.4.20(https://github.com/y-young/userscripts)";
 const ENTITY_TYPE_MAPPING = {
     artist: "release-group",
     label: "release",
@@ -358,6 +359,14 @@ function createToggleSelectionCheckbox() {
     return headCell;
 }
 
+function initHeaderCheckbox(header) {
+    if (header.querySelector("th.checkbox-cell")) {
+        // Already initialized
+        return;
+    }
+    header.prepend(createToggleSelectionCheckbox());
+}
+
 function initTableCheckboxes(table) {
     // Get rows
     const rows = Array.from(table.querySelectorAll("tr.odd, tr.even"));
@@ -391,29 +400,21 @@ function initTableCheckboxes(table) {
                     Number(header.getAttribute("colspan")) + 1
                 );
             });
-            table.querySelectorAll("tr.subh").forEach((header) => {
-                header.prepend(createToggleSelectionCheckbox());
-            });
+            table.querySelectorAll("tr.subh").forEach(initHeaderCheckbox);
             break;
         case "work":
             table.querySelectorAll("tr.subh th[colspan]").forEach((header) => {
                 header.setAttribute("colspan", "5");
             });
-            table
-                .querySelector("thead tr")
-                .prepend(createToggleSelectionCheckbox());
+            initHeaderCheckbox(table.querySelector("thead tr"));
             break;
         case "search":
         case "series":
-            table
-                .querySelector("thead tr")
-                .prepend(createToggleSelectionCheckbox());
+            initHeaderCheckbox(table.querySelector("thead tr"));
             break;
         case "collection":
             if (!table.querySelector("thead th input[type='checkbox']")) {
-                table
-                    .querySelector("thead tr")
-                    .prepend(createToggleSelectionCheckbox());
+                initHeaderCheckbox(table.querySelector("thead tr"));
             }
             break;
     }
@@ -422,6 +423,23 @@ function initTableCheckboxes(table) {
 function initCheckboxes() {
     document.querySelectorAll("table.tbl").forEach((table) => {
         initTableCheckboxes(table);
+
+        // Handle dynamically loaded rows,
+        // e.g. more than 100 tracks in a medium, or more than 7 media
+        const observerOptions = {
+            childList: true,
+            subtree: true,
+        };
+        const observer = new MutationObserver((records) => {
+            if (
+                records.findIndex(
+                    (record) => record.target.tagName === "TBODY"
+                ) != -1
+            ) {
+                initTableCheckboxes(table);
+            }
+        });
+        observer.observe(table, observerOptions);
     });
 }
 
