@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MusicBrainz Artist Credits Helper
 // @namespace    https://github.com/y-young/userscripts
-// @version      2023.10.7
+// @version      2024.5.5
 // @description  Split and fill artist credits, append character voice actor credit, and guess artists from track titles.
 // @author       y-young
 // @license      MIT; https://opensource.org/licenses/MIT
@@ -17,7 +17,7 @@
 
 "use strict";
 
-const CLIENT = "Artist Credits Helper/2023.10.7(https://github.com/y-young)";
+const CLIENT = "Artist Credits Helper/2024.5.5(https://github.com/y-young)";
 // Default values
 const CV_JOIN_PHRASES = [" (CV ", ")"];
 const SEPARATOR = ",";
@@ -372,19 +372,7 @@ function createButton(title, onClick) {
 }
 
 function initBubbleTools() {
-    let bubble = document.getElementById("artist-credit-bubble");
-    /*
-        If all tracks have artist credits entered,
-        there's no bubble container until user interaction.
-        To correctly listen and inject buttons, we have to create one in advance.
-    */
-    if (!bubble) {
-        bubble = document.createElement("div");
-        bubble.setAttribute("id", "artist-credit-bubble");
-        document.body.appendChild(bubble);
-    }
-
-    const initButtons = () => {
+    const initButtons = (bubble) => {
         const container = bubble.querySelector("div.buttons");
         if (ENABLE_APPEND_CHARACTER_CV) {
             const appendButton = createButton(
@@ -400,14 +388,17 @@ function initBubbleTools() {
         container.appendChild(parseButton);
     };
 
-    const observerCallback = (_, observer) => {
-        initButtons();
+    const observerCallback = () => {
+        const bubble = document.getElementById("artist-credit-bubble");
+        if (!bubble) {
+            return;
+        }
+        initButtons(bubble);
         editor.init(bubble);
-        observer.disconnect();
     };
 
     const observer = new MutationObserver(observerCallback);
-    observer.observe(bubble, { childList: true });
+    observer.observe(document.body, { childList: true });
 }
 
 function initTrackTools() {
