@@ -1,15 +1,15 @@
 // ==UserScript==
 // @name         MusicBrainz Import from Music Forest
 // @namespace    https://github.com/y-young
-// @version      2022.4.14.1
+// @version      2024.5.5
 // @description  Import releases from Music Forest into MusicBrainz.
 // @author       y-young
 // @licence      MIT; https://opensource.org/licenses/MIT
 // @supportURL   https://github.com/y-young/userscripts/labels/mb-import-from-music-forest
 // @downloadURL  https://github.com/y-young/userscripts/raw/master/musicbrainz-import-from-music-forest.user.js
-// @match        https://search.minc.or.jp/music/list*
-// @match        https://search.minc.or.jp/product/list*
-// @icon         https://search.minc.or.jp/favicon.ico
+// @match        https://www.minc.or.jp/music/list*
+// @match        https://www.minc.or.jp/product/list*
+// @icon         https://www.minc.or.jp/favicon.ico
 // @require      https://cdn.jsdelivr.net/gh/murdos/musicbrainz-userscripts@e84565918e728252753a6e24d350b995dfae2953/lib/mbimport.js
 // @grant        GM_registerMenuCommand
 // ==/UserScript==
