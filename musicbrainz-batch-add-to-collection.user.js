@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              MusicBrainz Batch Add to Collection
 // @namespace         https://github.com/y-young/userscripts
-// @version           2024.4.20
+// @version           2025.5.11
 // @description       Batch add entities to MusicBrainz collection and copy MBIDs from entity pages, search result or existing collections.
 // @author            y-young
 // @license           MIT; https://opensource.org/licenses/MIT
@@ -12,6 +12,8 @@
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/artist\/[\w-]+\/(events|releases|recordings|works)\/?(\?page=\d+|\?filter.+)?$/
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/place\/[\w-]+\/events\/?(\?page=\d+)?$/
 // @include           /^https?:\/\/(.*\.)?musicbrainz.org\/search\?.*type=(artist|event|label|instrument|place|recording|release_group|release|series|work)/
+// @require           https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js
+// @require           https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js
 // @grant             GM_setClipboard
 // @grant             GM_getValue
 // @grant             GM_setValue
@@ -30,7 +32,7 @@ const CLOSE_DIALOG_AFTER_SUBMIT = true;
 
 const IDENTIFIER = "batch-add-to-collection";
 const CLIENT =
-    "BatchAddToCollection/2024.4.20(https://github.com/y-young/userscripts)";
+    "BatchAddToCollection/2025.5.11(https://github.com/y-young/userscripts)";
 const ENTITY_TYPE_MAPPING = {
     artist: "release-group",
     label: "release",
@@ -50,6 +52,8 @@ const DIALOG_LOADING_NOTICE = `
         Loading your collections...
     </div>
 `;
+
+let $ = jQuery.noConflict(true);
 
 const url = new URL(location.href);
 const origin = url.origin;
